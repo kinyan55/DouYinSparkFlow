@@ -4,6 +4,20 @@
 ![Playwright](https://img.shields.io/badge/Playwright-%E2%9C%94-green?logo=playwright)
 ![chrome-headless-shell](https://img.shields.io/badge/chrome--headless--shell-%E2%9C%94-brightgreen?logo=googlechrome)
 
+## 🎉 2026 正月限定（除夕至正月十五）
+
+除夕当天到正月十五期间，可开启祝福模式，每日向好友发送与当日相关的祝福语。
+
+### 启用方法
+
+拉取最新代码后，将 `config.json` 中 `happyNewYear` 下的 `enabled` 设为 `true`。
+
+`happyNewYear.messageTemplate` 为正月祝福模板，支持以下占位符：
+
+1. `[API]`：祝福语
+2. `[data]`：公历日期，例如 2026年02月16日
+3. `[data_lunar]`：农历日期，例如 农历除夕、正月初一、正月初二 等
+
 ## 📌 简单介绍
 
 **抖音火花自动续火脚本**一款轻量实用的抖音互动脚本，可自动为你和抖音好友续火花，无需手动操作。
