@@ -69,8 +69,6 @@
 
 ![创建`user-data`环境图](docs/images/屏幕截图%202026-02-14%20224915.png)
 
-关于这个配置的内容可以再次运行main.py,选择`2. 获取Github Action配置`将对应输出内容填入`USER_DATA`的值即可
-
 4. （可选）手动触发Action进行测试
 
 仓库的工作流中添加了`workflow_dispatch`以便允许进行手动触发，在初次配置完成后可以通过手动触发Action来进行验证。
