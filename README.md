@@ -30,8 +30,6 @@
 
 使用`PlayWright`以及`chrome-headless-shell`自动化操作[抖音创作者中心](https://creator.douyin.com/)，进行定时发送抖音消息来续火花
 
-### 使用门槛
-
 ## 🚀 使用方法
 
 **材料准备：** 一个 GitHub 账号和可用浏览器即可，不设额外门槛。
