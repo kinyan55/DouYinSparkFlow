@@ -13,13 +13,24 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d -
 LOG_FILE = "logs/app.log"
 
 # 配置日志
-def setup_logger(name="app", level=logging.INFO):
+def setup_logger(name="app", level="Info"):
     """
     配置日志记录器
     :param name: 日志记录器名称
     :param level: 日志级别
     :return: 配置好的日志记录器
     """
+    if level == "Debug":
+        level = logging.DEBUG
+    elif level == "Info":
+        level = logging.INFO
+    elif level == "Warning":
+        level = logging.WARNING
+    elif level == "Error":
+        level = logging.ERROR
+    else:
+        level = logging.INFO
+    
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
@@ -46,7 +57,7 @@ def setup_logger(name="app", level=logging.INFO):
 
 # 示例：使用日志记录器
 if __name__ == "__main__":
-    logger = setup_logger(level=logging.DEBUG)
+    logger = setup_logger(level="Debug")
     logger.debug("这是一个调试信息")
     logger.info("这是一个普通信息")
     logger.warning("这是一个警告信息")

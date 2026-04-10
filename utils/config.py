@@ -10,9 +10,7 @@ logger = setup_logger(level=logging.DEBUG)
 是否启用调试模式
 更详细的日志打印，浏览器操作可视化等
 """
-DEBUG = False
-CONFIGFILE = "config.json"
-USERDATAFILE = "usersData.json"
+DEBUG = True
 config = None
 userData = None
 
@@ -41,20 +39,30 @@ def get_config():
     :return: 配置字典
     """
     global config
-    
+
     if config:
         return config
-    
-    env = get_environment()
 
-    configFile = CONFIGFILE
+    config = {
+        "proxyAddress": os.getenv("PROXY_ADDRESS", ""),
+        "messageTemplate": os.getenv("MESSAGE_TEMPLATE", "[盖瑞]今日火花[加一]\\n—— [右边] 每日一言 [左边] ——\\n[API]"),
+        "hitokotoTypes": json.loads(
+            os.getenv("HITOKOTO_TYPES", '["文学","影视","诗词","哲学"]')
+        ),
+        "matchMode": os.getenv("MATCH_MODE", "nickname"),  # 是否使用短 ID 进行好友匹配
+        "browserTimeout": int(os.getenv("BROWSER_TIMEOUT", "120000")),  # 浏览器操作超时时间，单位毫秒
+        "friendListTimeout": int(os.getenv("FRIEND_LIST_WAIT_TIME", "2000")),  # 好友列表加载超时时间，单位毫秒
+        "taskRetryTimes": int(os.getenv("TASK_RETRY_TIMES", "3")),  # 任务重试次数
+        "logLevel": os.getenv("LOG_LEVEL", "DEBUG"),  # 日志级别
+    }
 
-    if env == Environment.PACKED:
-        configFile = os.path.join(os.path.dirname(sys.executable), CONFIGFILE)
-
-    with open(configFile, "r", encoding="utf-8") as f:
-        config = json.loads(f.read())
     return config
+
+def sanitize_cookies(cookies):
+    for cookie in cookies:
+        if "sameSite" in cookie:
+            cookie.pop("sameSite")  # 移除 sameSite 字段，Playwright 可能不支持该字段
+    return cookies
 
 
 def get_userData():
@@ -63,25 +71,42 @@ def get_userData():
     :return: 用户数据目录路径
     """
     global userData
-    
+
     if userData:
         return userData
-    
-    userDataFile = USERDATAFILE
-    userDataJson = ""
 
-    env = get_environment()
+    tasks = json.loads(os.getenv("TASKS", "[]"))
 
-    if env == Environment.GITHUBACTION:
-        userDataJson = os.getenv("USER_DATA", None)
-        if not userDataJson:
-            logger.error("环境变量 USER_DATA 未设置")
-            exit(1)
-    else:
-        if env == Environment.PACKED:
-            userDataFile = os.path.join(os.path.dirname(sys.executable), USERDATAFILE)
-        with open(userDataFile, "r", encoding="utf-8") as f:
-            userDataJson = f.read()
+    userData = []
 
-    userData = json.loads(userDataJson)
+    for task in tasks:
+        username = task.get("username", "未知用户")
+        unique_id = task.get("unique_id")
+        if not unique_id:
+            logger.warning(f"{username} 的任务  缺少 unique_id 字段，已跳过")
+            continue
+        cookies_key = f"cookies_{unique_id}".upper()
+        cookies_str = (
+            os.getenv(cookies_key, "").encode("utf-8").decode("unicode_escape")
+        )
+        if not cookies_str:
+            logger.warning(
+                f"{username} 的任务 缺少 {cookies_key} 环境变量，已跳过"
+            )
+            continue
+        try:
+            cookies = json.loads(cookies_str)
+        except json.JSONDecodeError:
+            logger.warning(f"{username} 的任务 {cookies_key} 格式不正确，已跳过")
+            continue
+
+        userData.append(
+            {
+                "unique_id": unique_id,
+                "username": username,
+                "cookies": sanitize_cookies(cookies),
+                "targets": task.get("targets", []),
+            }
+        )
+
     return userData
